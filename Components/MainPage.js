@@ -5,12 +5,12 @@ import React, { Component } from 'react';
 import {
     StyleSheet,
     Text,
-    TextInput,
     View,
     TouchableHighlight,
     ActivityIndicator,
-    Image
 } from 'react-native';
+
+var ResultsPage = require('./ResultsPage');
 
 var styles = StyleSheet.create({
     container: {
@@ -34,55 +34,100 @@ var styles = StyleSheet.create({
         color: 'white',
         alignSelf: 'center'
     },
+    description: {
+        marginBottom: 20,
+        fontSize: 18,
+        textAlign: 'center',
+        color: '#656565'
+    },
 });
 
 // The following two fuctions are set up for later extension
 function urlForStartingJob(deviceID) {
-    return 'http://api.athelas.com/devices/' + deviceID + '/start';
+    return 'https://api.athelas.com/devices/' + deviceID + '/start';
 }
 
 function urlForPollingJob(jobID) {
-    return 'http://api.athelas.com/jobs/' + jobID + '/poll';
+    return 'https://api.athelas.com/jobs/' + jobID + '/poll';
 }
 
 class MainPage extends Component {
     constructor(props) {
         super(props);
-        this.state = {isLoading: false};
+        this.state = {isLoading: false, message: '', isPolling: false};
     }
 
-    _handleResponse(response) {
-        this.setState({isLoading: false});
-
-        if(response.application_response_code.substr(0, 1) == '1') {
+    goToResultsPage(jobID) {
+        this.setState({isLoading: false, isPolling: false}, () => {
             this.props.navigator.push({
                 title: 'Results',
-                component: SearchResults,
-                passProps: {listings: response.listings}
+                component: ResultsPage,
+                passProps: {jobID: job_id}
             });
-        }else{
-            this.setState({message: 'Location not recongnized; please try again'});
-        }
+        });
     }
 
-    _executeQuery(query) {
+    _beginPolling(jobID) {
+        var _this = this;
+        this.setState({isLoading: true, isPolling: true}, () => {
+            var query = urlForPollingJob(jobID);
+
+            _this.pollingIntervalID = setInterval(() => {
+                if(_this.state.isPolling === true) {
+                    _this._pollJob(query);
+                }
+            }, 1000);
+        });
+    }
+
+    _handleStartJobResponse(response) {
+        console.log(response);
+
+        return new Promise((resolve, reject) => {
+            if(response.status === 1) {
+                this.setState({isLoading: false});
+                resolve(response);
+            }else{
+                reject();
+            }
+        });
+    }
+
+    _pollJob(query) {
+        fetch(query)
+            .then(response => response.json())
+            .then(json => this._handleStartJobResponse(json))
+            .then(jobID => this.goToResultsPage(jobID),
+             () => this.setState({message: 'Polling not over'}))
+            .catch(error =>
+                this.setState({
+                    isLoading: false,
+                    message: 'Something bad happened in polling ' + error
+            }));
+    }
+
+    _startJob(query) {
         this.setState({isLoading: true}, () => {
             fetch(query)
                 .then(response => response.json())
-                .then(json => this._handleResponse(json.response))
+                .then(json => this._handleStartJobResponse(json))
+                .then(response => this._beginPolling(response.job_id),
+                 () => this.setState({message: 'There was an error starting your job'}))
                 .catch(error =>
                     this.setState({
                         isLoading: false,
-                        message: 'Something bad happened ' + error
+                        message: 'Something bad happened in start job ' + error + error.lineNumber
                 }));
         });
     }
 
     onGetDataButtonPressed() {
-
+        var query = urlForStartingJob('0000000033a23b0c');
+        this._startJob(query);
     }
 
     render() {
+        // console.log(this.state.message);
         var spinner = this.state.isLoading ?
             (<ActivityIndicator size='large'/>) :
             (<View/>);
@@ -93,6 +138,7 @@ class MainPage extends Component {
                     <Text style={styles.buttonText}>Get Test Data</Text>
                 </TouchableHighlight>
                 {spinner}
+                <Text style={styles.description}>{this.state.message}</Text>
             </View>
         );
     }
