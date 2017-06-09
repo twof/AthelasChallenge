@@ -27,10 +27,27 @@ var styles = StyleSheet.create({
 class ResultsPage extends Component {
     render() {
         return (
-            <Text style={styles.description}>{this.props.results}</Text>
+            <View style={styles.container}>
+                <Text style={styles.description}>{this.props.results}</Text>
+            </View>
         );
     }
 }
+
+// Sample
+// {
+//   "blur": 0,
+//   "created_at": "Fri, 09 Jun 2017 03:08:09 GMT",
+//   "dark": 0,
+//   "lymphocytes": "0%",
+//   "neutrophils": "0%",
+//   "platelet_count": 0,
+//   "platelet_range": "Normal Range",
+//   "status": 1,
+//   "updated_at": "Fri, 09 Jun 2017 03:13:01 GMT",
+//   "wbc_count": 4,
+//   "wbc_range": "Normal Range"
+// }
 
 
 module.exports = ResultsPage;

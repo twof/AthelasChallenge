@@ -60,6 +60,7 @@ class MainPage extends Component {
 
     goToResultsPage(results) {
         console.log('At results page', results);
+        // Send results to local storage before
         this.setState({isLoading: false, isPolling: false}, () => {
             this.props.navigator.push({
                 title: 'Results',
