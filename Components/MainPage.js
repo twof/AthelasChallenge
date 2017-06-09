@@ -9,6 +9,7 @@ import {
     TouchableHighlight,
     ActivityIndicator,
 } from 'react-native';
+import Config from 'react-native-config';
 
 var ResultsPage = require('./ResultsPage');
 
@@ -57,12 +58,13 @@ class MainPage extends Component {
         this.state = {isLoading: false, message: '', isPolling: false};
     }
 
-    goToResultsPage(jobID) {
+    goToResultsPage(results) {
+        console.log('At results page', results);
         this.setState({isLoading: false, isPolling: false}, () => {
             this.props.navigator.push({
                 title: 'Results',
                 component: ResultsPage,
-                passProps: {jobID: job_id}
+                passProps: {results: results}
             });
         });
     }
@@ -81,8 +83,7 @@ class MainPage extends Component {
     }
 
     _handleStartJobResponse(response) {
-        console.log(response);
-
+        console.log("resp", response);
         return new Promise((resolve, reject) => {
             if(response.status === 1) {
                 this.setState({isLoading: false});
@@ -97,7 +98,7 @@ class MainPage extends Component {
         fetch(query)
             .then(response => response.json())
             .then(json => this._handleStartJobResponse(json))
-            .then(jobID => this.goToResultsPage(jobID),
+            .then(response => this.goToResultsPage(response),
              () => this.setState({message: 'Polling not over'}))
             .catch(error =>
                 this.setState({
@@ -109,8 +110,15 @@ class MainPage extends Component {
     _startJob(query) {
         this.setState({isLoading: true}, () => {
             fetch(query)
-                .then(response => response.json())
-                .then(json => this._handleStartJobResponse(json))
+                .then(response => {
+                    return response;
+                })
+                .then(response => {
+                    return response.json();
+                })
+                .then(json => {
+                    return this._handleStartJobResponse(json);
+                })
                 .then(response => this._beginPolling(response.job_id),
                  () => this.setState({message: 'There was an error starting your job'}))
                 .catch(error =>
@@ -122,7 +130,7 @@ class MainPage extends Component {
     }
 
     onGetDataButtonPressed() {
-        var query = urlForStartingJob('0000000033a23b0c');
+        var query = urlForStartingJob(Config.DEVICE_ID);
         this._startJob(query);
     }
 
