@@ -12,6 +12,7 @@ import {
 import Config from 'react-native-config';
 
 var ResultsPage = require('./ResultsPage');
+var Storage = require('../Helpers/Storage');
 
 var styles = StyleSheet.create({
     container: {
@@ -58,7 +59,7 @@ class MainPage extends Component {
         this.state = {isLoading: false, message: '', isPolling: false};
     }
 
-    goToResultsPage(results) {
+    _goToResultsPage(results) {
         console.log('At results page', results);
         // Send results to local storage before
         this.setState({isLoading: false, isPolling: false}, () => {
@@ -66,6 +67,18 @@ class MainPage extends Component {
                 title: 'Results',
                 component: ResultsPage,
                 passProps: {results: results}
+            });
+        });
+    }
+
+    _addResultToLocalStorage(result) {
+        return new Promise((resolve, reject) => {
+            this.storage.appendResult(result, (error, allResults) => {
+                if(error){
+                    throw error;
+                }else{
+                    resolve(allResults);
+                }
             });
         });
     }
@@ -99,8 +112,10 @@ class MainPage extends Component {
         fetch(query)
             .then(response => response.json())
             .then(json => this._handleStartJobResponse(json))
-            .then(response => this.goToResultsPage(response),
-             () => this.setState({message: 'Polling not over'}))
+            .then(response => this._addResultToLocalStorage(response),
+                () => Promise.reject())
+            .then(allResults => this._goToResultsPage(allResults),
+                () => this.setState({message: 'Polling not over'}))
             .catch(error =>
                 this.setState({
                     isLoading: false,
@@ -131,8 +146,19 @@ class MainPage extends Component {
     }
 
     onGetDataButtonPressed() {
-        var query = urlForStartingJob(Config.DEVICE_ID);
-        this._startJob(query);
+        // don't start polling a job again if we already are
+        if(!this.state.isLoading) {
+            var query = urlForStartingJob(Config.DEVICE_ID);
+
+            // Init storage for later use
+            this.resultStore = new Storage((error) => {
+                if(error) {
+                    console.log(error);
+                }else{
+                    this._startJob(query);
+                }
+            });
+        }
     }
 
     render() {
