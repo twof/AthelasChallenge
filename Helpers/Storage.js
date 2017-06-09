@@ -13,11 +13,11 @@ class Storage {
     //      cloud under the user's account or something. Don't want all the
     //      user's medical reccords lost if something happens to their phone
     constructor(completion) {
-        this.RESULTS_KEY = 'RESULTS';
-        this.resultsCache = [];
+        this._RESULTS_KEY = 'RESULTS';
+        this._resultsCache = [];
         const _this = this;
 
-        AsyncStorage.getItem(this.RESULTS_KEY, (error, currentResult) =>  {
+        AsyncStorage.getItem(this._RESULTS_KEY, (error, currentResult) =>  {
             if(error) {
                 completion(error);
             }else{
@@ -31,19 +31,35 @@ class Storage {
 
     appendResult(resultToAppend, completion) {
         const _this = this;
-
-        var newResult = this.resultsCache;
+        var newResult = this._resultsCache;
 
         newResult.push(resultToAppend);
+        this._resultsCache = newResult;
 
-        this.resultsCache = newResult;
-
-        AsyncStorage.setItem(this.RESULTS_KEY, JSON.stringify(newResult), (error) => {
+        AsyncStorage.setItem(this._RESULTS_KEY, JSON.stringify(newResult), (error) => {
             if(error) {
                 _this.console.log(error);
                 completion(error, null);
             }else{
                 completion(null, newResult);
+            }
+        });
+    }
+
+    getResultList() {
+        return this._resultsCache;
+    }
+
+    clearResultsStore(completion) {
+        const _this = this;
+        this._resultsCache = [];
+
+        AsyncStorage.setItem(this._RESULTS_KEY, JSON.stringify(this._resultsCache), (error) => {
+            if(error) {
+                _this.console.log(error);
+                completion(error, null);
+            }else{
+                completion(null, _this._resultsCache);
             }
         });
     }

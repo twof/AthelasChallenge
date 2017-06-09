@@ -72,10 +72,11 @@ class MainPage extends Component {
     }
 
     _addResultToLocalStorage(result) {
+        const _this = this;
         return new Promise((resolve, reject) => {
-            this.storage.appendResult(result, (error, allResults) => {
+            _this.resultStore.appendResult(result, (error, allResults) => {
                 if(error){
-                    throw error;
+                    reject(error);
                 }else{
                     resolve(allResults);
                 }
@@ -85,12 +86,16 @@ class MainPage extends Component {
 
     _beginPolling(jobID) {
         var _this = this;
+        jobID = 2521;
+
         this.setState({isLoading: true, isPolling: true}, () => {
             var query = urlForPollingJob(jobID);
 
             _this.pollingIntervalID = setInterval(() => {
                 if(_this.state.isPolling === true) {
                     _this._pollJob(query);
+                }else{
+                    clearInterval(_this.pollingIntervalID);
                 }
             }, 1000);
         });
@@ -100,7 +105,6 @@ class MainPage extends Component {
         console.log("resp", response);
         return new Promise((resolve, reject) => {
             if(response.status === 1) {
-                this.setState({isLoading: false});
                 resolve(response);
             }else{
                 reject();
@@ -115,7 +119,7 @@ class MainPage extends Component {
             .then(response => this._addResultToLocalStorage(response),
                 () => Promise.reject())
             .then(allResults => this._goToResultsPage(allResults),
-                () => this.setState({message: 'Polling not over'}))
+                (error) => this.setState({message: 'Polling not over ' + error}))
             .catch(error =>
                 this.setState({
                     isLoading: false,
