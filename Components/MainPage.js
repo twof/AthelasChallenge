@@ -134,11 +134,14 @@ class MainPage extends Component {
                     return response;
                 })
                 .then(response => {
+                    console.log(response);
                     return response.json();
                 })
                 .then(json => {
+                    console.log(json);
                     return this._handleStartJobResponse(json);
                 })
+                .catch(err => {console.log(error);})
                 .then(response => this._beginPolling(response.job_id),
                  () => this.setState({message: 'There was an error starting your job'}))
                 .catch(error =>

@@ -8,6 +8,7 @@ import {
     View,
     TouchableHighlight,
 } from 'react-native';
+import Chart from 'react-native-chart';
 
 var styles = StyleSheet.create({
     container: {
@@ -21,14 +22,24 @@ var styles = StyleSheet.create({
         textAlign: 'center',
         color: '#656565'
     },
+    chart: {
+		width: 200,
+		height: 200,
+	},
 });
 
 
 class ResultsPage extends Component {
     render() {
+        var results = this.props.results;
+        var firstResult = results[results.length-1];
+
+        var wbcFeeling = (firstResult.wbc_range === "Normal Range") ? "😁" : "😧";
+
         return (
             <View style={styles.container}>
-                <Text style={styles.description}>{this.props.results}</Text>
+                <Text style={styles.description}>White Blood Cell Count: {firstResult.wbc_count}</Text>
+                <Text style={styles.description}>Range: {wbcFeeling}</Text>
             </View>
         );
     }
