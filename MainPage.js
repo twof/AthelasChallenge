@@ -12,7 +12,7 @@ import {
 import Config from 'react-native-config';
 
 var ResultsPage = require('./ResultsPage');
-var Storage = require('../Helpers/Storage');
+var Storage = require('./Storage');
 
 var styles = StyleSheet.create({
     container: {
@@ -130,18 +130,10 @@ class MainPage extends Component {
     _startJob(query) {
         this.setState({isLoading: true}, () => {
             fetch(query)
-                .then(response => {
-                    return response;
-                })
-                .then(response => {
-                    console.log(response);
-                    return response.json();
-                })
-                .then(json => {
-                    console.log(json);
-                    return this._handleStartJobResponse(json);
-                })
-                .catch(err => {console.log(error);})
+                .then(response => response.json(),
+                err => console.log(err))
+                .then(json => this._handleStartJobResponse(json),
+                err => console.log(err))
                 .then(response => this._beginPolling(response.job_id),
                  () => this.setState({message: 'There was an error starting your job'}))
                 .catch(error =>
@@ -155,6 +147,7 @@ class MainPage extends Component {
     onGetDataButtonPressed() {
         // don't start polling a job again if we already are
         if(!this.state.isLoading) {
+            console.log(Config);
             var query = urlForStartingJob(Config.DEVICE_ID);
 
             // Init storage for later use

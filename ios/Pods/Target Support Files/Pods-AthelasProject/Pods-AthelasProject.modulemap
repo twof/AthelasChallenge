@@ -1,0 +1,6 @@
+framework module Pods_AthelasProject {
+  umbrella header "Pods-AthelasProject-umbrella.h"
+
+  export *
+  module * { export * }
+}

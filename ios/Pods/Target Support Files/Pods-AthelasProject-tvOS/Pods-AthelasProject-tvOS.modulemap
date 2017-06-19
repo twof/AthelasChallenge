@@ -1,0 +1,6 @@
+framework module Pods_AthelasProject_tvOS {
+  umbrella header "Pods-AthelasProject-tvOS-umbrella.h"
+
+  export *
+  module * { export * }
+}

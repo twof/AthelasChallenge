@@ -8,7 +8,7 @@ import {
   StyleSheet
 } from 'react-native';
 
-var MainPage = require('./Components/MainPage');
+var MainPage = require('./MainPage');
 
 var styles = StyleSheet.create({
     container: {
