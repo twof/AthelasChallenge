@@ -8,8 +8,10 @@ import {
     View,
     TouchableHighlight,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 import Config from 'react-native-config';
+import Load from "react-native-loading-gif";
 
 var ResultsPage = require('./ResultsPage');
 var Storage = require('./Storage');
@@ -42,6 +44,10 @@ var styles = StyleSheet.create({
         textAlign: 'center',
         color: '#656565'
     },
+    spinner: {
+        height: 100,
+        width: 100
+    }
 });
 
 // The following two fuctions are set up for later extension
@@ -164,7 +170,7 @@ class MainPage extends Component {
     render() {
         // console.log(this.state.message);
         var spinner = this.state.isLoading ?
-            (<ActivityIndicator size='large'/>) :
+            (<Image style={styles.spinner} resizeMode='contain' source={require('./LoadingFlask.gif')} />) :
             (<View/>);
 
         return (

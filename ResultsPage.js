@@ -24,8 +24,8 @@ var styles = StyleSheet.create({
         color: '#656565'
     },
     chart: {
-		width: 200,
-		height: 200,
+		width: 400,
+		height: 400,
 	},
 });
 
@@ -33,19 +33,22 @@ var styles = StyleSheet.create({
 class ResultsPage extends Component {
     render() {
         var results = this.props.results;
-
-        const wbcCounts = results.map((res, index) => [index, res.wbc_count]);
+        console.log("All Res", results);
+        const wbcCounts = results.map((res, index) => {return {y: res.wbc_count};});
+        console.log(wbcCounts);
+        var xAxis = {valueFormatter: wbcCounts.map((res, index) => String(index))};
+        console.log("x", xAxis);
         var firstResult = results[results.length-1];
 
         var wbcFeeling = (firstResult.wbc_range === "Normal Range") ? "😁" : "😧";
 
         var data = {
             dataSets: [{
-                values: [{y: 100}, {y: 110}, {y: 105}, {y: 115}],
-                label: 'Company X',
+                values: wbcCounts,
+                label: 'White Blood Cells',
                 config: {
                     lineWidth: 2,
-                    drawCircles: false,
+                    drawCircles: true,
                     highlightColor: processColor('red'),
                     color: processColor('red'),
                     drawFilled: true,
@@ -58,34 +61,7 @@ class ResultsPage extends Component {
                         spaceLength: 20
                     }
                 }
-            }, {
-                values: [{y: 90}, {y: 130}, {y: 100}, {y: 105}],
-                label: 'Company Y',
-                config: {
-                    lineWidth: 1,
-                    drawCubicIntensity: 0.4,
-                    circleRadius: 5,
-                    drawHighlightIndicators: false,
-                    color: processColor('blue'),
-                    drawFilled: true,
-                    fillColor: processColor('blue'),
-                    fillAlpha: 45,
-                    circleColor: processColor('blue')
-                }
-            }, {
-                values: [{y: 110}, {y: 105}, {y: 115}, {y: 110}],
-                label: 'Company Dashed',
-                config: {
-                    color: processColor('green'),
-                    drawFilled: true,
-                    fillColor: processColor('green'),
-                    fillAlpha: 50
-                }
-            }],
-        };
-
-        var xAxis = {
-            valueFormatter: ['Q1', 'Q2', 'Q3', 'Q4']
+            }]
         };
 
         var legend = {
@@ -101,10 +77,14 @@ class ResultsPage extends Component {
             wordWrapEnabled: true,
             maxSizePercent: 0.5,
             custom: {
-                colors: [processColor('red'), processColor('blue'), processColor('green')],
-                labels: ['Company X', 'Company Y', 'Company Dashed']
+                colors: [processColor('#90EAFE')],
+                labels: ['WBC']
             }
         };
+
+        // var xAxis = {
+        //     valueFormatter: ['Q1', 'Q2', 'Q3', 'Q4']
+        // };
 
         var marker = {
             enabled: true,
